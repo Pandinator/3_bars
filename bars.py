@@ -1,4 +1,5 @@
 import json
+from geopy.distance import vincenty
 
 
 def load_data(filepath):
@@ -9,31 +10,41 @@ def load_data(filepath):
 
 def get_biggest_bar(json_data):
     max_seats = json_data[0]['SeatsCount']
-    index = 0
     for bar_cell in range(1, len(json_data)):
     	if max_seats < json_data[bar_cell]['SeatsCount']:
     		max_seats = json_data[bar_cell]['SeatsCount']
-    		index = bar_cell
-    print(json_data[index]['Name'])
+    		index_of_bar = bar_cell
+    print("The biggest bar is: ", json_data[index_of_bar]['Name'])
 
 
 def get_smallest_bar(json_data):
     min_seats = json_data[0]['SeatsCount']
-    index = 0
     for bar_cell in range(1, len(json_data)):
     	if min_seats > json_data[bar_cell]['SeatsCount']:
     		min_seats = json_data[bar_cell]['SeatsCount']
-    		index = bar_cell
-    print(json_data[index]['Name'])
+    		index_of_bar = bar_cell
+    print("The smallest bar is: ", json_data[index_of_bar]['Name'])
 
 
 def get_closest_bar(json_data, longitude, latitude):
-    pass
+    bar_coords = json_data[0]['geoData']['coordinates']
+    position = (longitude, latitude)
+    min_range = vincenty(bar_coords, position).miles
+    for bar_cell in range(1, len(json_data)):
+        bar_coords = json_data[bar_cell]['geoData']['coordinates']
+        range_to_bar = vincenty(bar_coords, position).miles
+        if min_range >= range_to_bar:
+            min_range = range_to_bar
+            index_of_bar = bar_cell
+    print("The closest bar is: ", json_data[index_of_bar]['Name'])
 
 
 if __name__ == '__main__':
     filepath_input = input("Enter the file path to JSON: \n")
     data_to_analyse = load_data(filepath_input)
-    longitude, latitude = float(input("Enter the longitude and latitude: \n"))
+    print("Enter the longitude and latitude:")
+    longitude = float(input())
+    latitude = float(input())
     get_biggest_bar(data_to_analyse)
     get_smallest_bar(data_to_analyse)
+    get_closest_bar(data_to_analyse, longitude, latitude)
