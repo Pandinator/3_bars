@@ -3,40 +3,32 @@ from geopy.distance import vincenty
 
 
 def load_data(filepath):
-    with open(filepath, encoding="UTF-8") as json_file:
-    	json_data = json.load(json_file)
+    with open(filepath, encoding="utf-8") as json_file:
+        json_data = json.load(json_file)
     return json_data
 
 
-def get_biggest_bar(json_data):
-    max_seats = json_data[0]['SeatsCount']
-    for bar_cell in range(1, len(json_data)):
-    	if max_seats < json_data[bar_cell]['SeatsCount']:
-    		max_seats = json_data[bar_cell]['SeatsCount']
-    		index_of_bar = bar_cell
-    print("The biggest bar is: ", json_data[index_of_bar]['Name'])
+def print_biggest_bar(json_data):
+    max_seats = max(json_data, key=lambda x: x['SeatsCount'])
+    print("The biggest bar is: ", max_seats['Name'])
 
 
-def get_smallest_bar(json_data):
-    min_seats = json_data[0]['SeatsCount']
-    for bar_cell in range(1, len(json_data)):
-    	if min_seats > json_data[bar_cell]['SeatsCount']:
-    		min_seats = json_data[bar_cell]['SeatsCount']
-    		index_of_bar = bar_cell
-    print("The smallest bar is: ", json_data[index_of_bar]['Name'])
+def print_smallest_bar(json_data):
+    min_seats = min(json_data, key=lambda x: x['SeatsCount'])
+    print("The smallest bar is: ", min_seats['Name'])
 
 
-def get_closest_bar(json_data, longitude, latitude):
+def print_closest_bar(json_data, longitude, latitude):
     bar_coords = json_data[0]['geoData']['coordinates']
     position = (longitude, latitude)
     min_range = vincenty(bar_coords, position).miles
-    for bar_cell in range(1, len(json_data)):
-        bar_coords = json_data[bar_cell]['geoData']['coordinates']
+    for bar_cell in json_data:
+        bar_coords = bar_cell['geoData']['coordinates']
         range_to_bar = vincenty(bar_coords, position).miles
         if min_range >= range_to_bar:
             min_range = range_to_bar
-            index_of_bar = bar_cell
-    print("The closest bar is: ", json_data[index_of_bar]['Name'])
+            closest_bar = bar_cell
+    print("The closest bar is: ", closest_bar['Name'])
 
 
 if __name__ == '__main__':
